@@ -4,7 +4,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 
 ## Concepts
 
-* Throw away XML, Annotation, dynamic proxy, byte code generation
+* Throw away XML, Annotation, dynamic proxy and byte code generation
  - As simple as possible!
  - Eliminate all of unpredictable behaviors.
 * Typed query
