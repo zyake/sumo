@@ -18,13 +18,13 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 
 ## How to use
 
-1. Setup the DataSource.
+1 - Setup the DataSource.
 
 ``` java
     Expressions.setDataSource(dataSource);
 ```
 
-2.  Define entities and queries.
+2 -  Define entities and queries.
 
 ``` java
 
@@ -73,7 +73,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
     }
 ```
 
-3. Build a SQL object and execute a query.
+3 - Build a SQL object and execute a query.
 
 ``` java
       SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, datasource.getConnection());
