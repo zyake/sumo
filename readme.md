@@ -21,7 +21,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 1. Setup the DataSource.
 
 ``` java
-        Expressions.setDataSource(dataSource);
+    Expressions.setDataSource(dataSource);
 ```
 
 2.  Define entities and queries.
@@ -58,7 +58,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
         INSERT_HOGE(Queries.insertOne("HOGE")),
         SELECT_ONE_HOGE(Queries.selectOne("HOGE", Mappers.as(Hoge.class))),
         UPDATE_HOGE(Queries.updateOne("HOGE")),
-        DELETE_HOGE(deleteOne("HOGE"));
+        DELETE_HOGE(Queries.deleteOne("HOGE"));
 
         private final QueryExpression expression;
 
