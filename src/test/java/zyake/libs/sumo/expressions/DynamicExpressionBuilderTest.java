@@ -18,10 +18,12 @@ public class DynamicExpressionBuilderTest extends AbstractTest {
             try (Statement stmt = conn.createStatement()) {
                 try {
                     stmt.execute("DROP TABLE HOGE");
+                    stmt.execute("DROP TABLE HAGE");
                 } catch (SQLException e) {
                     // ignore
                 }
                 stmt.execute("CREATE TABLE HOGE(USER_NAME VARCHAR(30), ID INT, PRIMARY KEY(ID))");
+                stmt.execute("CREATE TABLE HAGE(NUM INT, USER_NAME VARCHAR(30), ID INT, PRIMARY KEY(ID, USER_NAME))");
             }
         });
     }
@@ -36,11 +38,29 @@ public class DynamicExpressionBuilderTest extends AbstractTest {
     }
 
     @Test
+    public void testBuildSelectOne_compositeKey() throws Exception {
+        run(conn -> {
+            DynamicExpressionBuilder builder = new DynamicExpressionBuilder(conn);
+            QueryExpression expression = builder.buildSelectOne("HAGE", r -> { return null; });
+            assertEquals("SELECT NUM,USER_NAME,ID FROM HAGE WHERE ID=? AND USER_NAME=?", expression.getText());
+        });
+    }
+
+    @Test
     public void testBuildUpdateOne() throws Exception {
         run(conn -> {
             DynamicExpressionBuilder builder = new DynamicExpressionBuilder(conn);
             QueryExpression expression = builder.buildUpdateOne("HOGE");
             assertEquals("UPDATE HOGE SET USER_NAME=? WHERE ID=?", expression.getText());
+        });
+    }
+
+    @Test
+    public void testBuildUpdateOne_compositeKey() throws Exception {
+        run(conn -> {
+            DynamicExpressionBuilder builder = new DynamicExpressionBuilder(conn);
+            QueryExpression expression = builder.buildUpdateOne("HAGE");
+            assertEquals("UPDATE HAGE SET NUM=? WHERE ID=? AND USER_NAME=?", expression.getText());
         });
     }
 

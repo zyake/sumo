@@ -37,8 +37,8 @@ public class DynamicExpressionBuilder {
             DatabaseMetaData metaData = connection.getMetaData();
 
             StringBuilder query = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
-            String primaryKey = getPrimaryKey(tableName, metaData);
-            addSetClause(tableName, metaData, query, primaryKey);
+            List<String> primaryKeys = getPrimaryKeys(tableName, metaData);
+            addSetClause(tableName, metaData, query, primaryKeys);
             query.append(" WHERE ");
             addPrimaryKeyClause(tableName, metaData, query);
 
@@ -63,24 +63,8 @@ public class DynamicExpressionBuilder {
         }
     }
 
-    public QueryExpression buildSelectAll(String tableName, SQL.RowMapper mapper)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try {
-            DatabaseMetaData metaData = connection.getMetaData();
-
-            StringBuilder query = new StringBuilder("SELECT ");
-
-            addColumnNames(tableName, metaData, query);
-            query.append(" FROM ").append(tableName);
-
-            return parser.parse(query.toString(), mapper);
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-    }
-
     public QueryExpression buildSelectOne(String tableName, SQL.RowMapper mapper)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
+            throws SQLRuntimeException {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -97,7 +81,7 @@ public class DynamicExpressionBuilder {
     }
 
     public QueryExpression buildDeleteOne(String tableName)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
+            throws SQLRuntimeException {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -114,24 +98,31 @@ public class DynamicExpressionBuilder {
 
     private void addPrimaryKeyClause(String tableName, DatabaseMetaData metaData, StringBuilder query) throws SQLException {
         try ( ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, tableName) ) {
-            primaryKeys.next();
+            if (!primaryKeys.next()) {
+                return;
+            }
+
             String columnName = primaryKeys.getString(COLUMN_NAME);
             query.append(columnName).append("={").append(columnName).append("}");
             if ( primaryKeys.next() ) {
-                throw new MultiplePrimaryKeyException("Multiple primary key found! : target=" + tableName);
+                query.append(" AND ");
+                String columnName1 = primaryKeys.getString(COLUMN_NAME);
+                query.append(columnName1).append("={").append(columnName1).append("}");
             }
         }
     }
 
-    private String getPrimaryKey(String tableName, DatabaseMetaData metaData) throws SQLException {
+    private List<String> getPrimaryKeys(String tableName, DatabaseMetaData metaData) throws SQLException {
+        List<String> keys = new ArrayList<>();
         try ( ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, tableName) ) {
-            primaryKeys.next();
-            String columnName = primaryKeys.getString(COLUMN_NAME);
-            if ( primaryKeys.next() ) {
-                throw new MultiplePrimaryKeyException("Multiple primary key found! : target=" + tableName);
+            while(primaryKeys.next()) {
+                keys.add(primaryKeys.getString(COLUMN_NAME));
             }
-            return columnName;
+            if (keys.size() == 0) {
+                throw new NoPrimaryKeyException("At least one primary key has needed!: table=" + tableName);
+            }
         }
+        return keys;
     }
 
     private List<String> addColumnNames(String tableName, DatabaseMetaData metaData, StringBuilder query) throws SQLException {
@@ -160,19 +151,24 @@ public class DynamicExpressionBuilder {
         query.append(")");
     }
 
-    private void addSetClause(String tableName, DatabaseMetaData metaData, StringBuilder query, String primaryKey)
+    private void addSetClause(String tableName, DatabaseMetaData metaData, StringBuilder query, List<String> primaryKeys)
             throws SQLException {
+        boolean setExists = false;
         try ( ResultSet columns = metaData.getColumns(null, null, tableName, null) ) {
             while ( columns.next() ) {
                 String columnName = columns.getString(COLUMN_NAME);
-                if ( primaryKey.equals(columnName) ) {
+                if ( primaryKeys.contains(columnName) ) {
                     continue;
                 }
+                setExists = true;
                 query.append(columnName).append("={").append(columnName).append("},");
             }
             if (query.charAt(query.length() - 1) == ',') {
                 query.deleteCharAt(query.length() - 1);
             }
+        }
+        if ( !setExists ) {
+            throw new NoSetCaluseException("The table that is consisted by a composite key only!: table=" + tableName);
         }
     }
 }

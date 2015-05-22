@@ -3,10 +3,8 @@ package zyake.libs.sumo.expressions;
 import zyake.libs.sumo.QueryExpression;
 import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.SQLRuntimeException;
-import zyake.libs.sumo.SUMO;
 import zyake.libs.sumo.unsafe.SUMOUnsafe;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,7 +48,7 @@ public class Expressions {
     }
 
     public static QueryExpression selectOne(String tableName, SQL.RowMapper mapper)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
+            throws SQLRuntimeException {
         try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildSelectOne(tableName, mapper);
         } catch (SQLException e) {
@@ -59,7 +57,7 @@ public class Expressions {
     }
 
     public static QueryExpression deleteOne(String tableName)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
+            throws SQLRuntimeException {
         try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildDeleteOne(tableName);
         } catch (SQLException e) {
