@@ -22,15 +22,19 @@ public interface SQL<Q extends Query> {
 
     <T> List<T> query(Q query, ParamSetup setup) throws SQLRuntimeException;
 
+    <T> T queryOne(Q query) throws SQLRuntimeException;
+
+    <T> T queryOne(Q query, ParamSetup setup) throws SQLRuntimeException;
+
     int update(Q query) throws SQLRuntimeException;
 
     int update(Q query, ParamSetup setup) throws SQLRuntimeException;
 
-    <T> int[] batch(Q query, Iterable<T> iterable, BatchStatementSetup<T> setup);
+    <T> int[] batch(Q query, Iterable<T> iterable, BatchStatementSetup<T> setup) throws SQLRuntimeException;
 
-    <T> void cursor(Q query, CursorAcceptor<T> acceptor);
+    <T> void cursor(Q query, CursorAcceptor<T> acceptor) throws SQLRuntimeException;
 
-    <T> void cursor(Q query, ParamSetup setup, CursorAcceptor<T> acceptor);
+    <T> void cursor(Q query, ParamSetup setup, CursorAcceptor<T> acceptor) throws SQLRuntimeException;
 
     @FunctionalInterface
     public interface ParamSetup {

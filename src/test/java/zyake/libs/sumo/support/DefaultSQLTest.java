@@ -2,10 +2,7 @@ package zyake.libs.sumo.support;
 
 import org.junit.Before;
 import org.junit.Test;
-import zyake.libs.sumo.AbstractTest;
-import zyake.libs.sumo.Query;
-import zyake.libs.sumo.QueryExpression;
-import zyake.libs.sumo.SQL;
+import zyake.libs.sumo.*;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -44,7 +41,7 @@ public class DefaultSQLTest extends AbstractTest {
         });
 
         try ( Connection conn = getConnection() ) {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, () -> conn);
             List<Hoge> hoges = sql.query(SELECT_ALL);
 
             assertEquals(hoges.toString(), "[Hoge{id=6, user_name=\'NAME\'}]");
@@ -59,7 +56,7 @@ public class DefaultSQLTest extends AbstractTest {
         });
 
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             List<Hoge> hoges = sql.query(SELECT_ALL);
             assertEquals(hoges.toString(),
                     "[Hoge{id=6, user_name=\'NAME\'}, Hoge{id=8, user_name='NAME2'}]");
@@ -74,7 +71,7 @@ public class DefaultSQLTest extends AbstractTest {
         });
 
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             List<Hoge> hoges = sql.query(SELECT_ALL_ID_GRETER_THAN,
                     p -> p.set("id", 6));
 
@@ -91,7 +88,7 @@ public class DefaultSQLTest extends AbstractTest {
         });
 
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             List<Hoge> hoges = sql.query(SELECT_ALL_ID_GRETER_THAN,
                     p -> p.set("id", 6));
 
@@ -108,8 +105,10 @@ public class DefaultSQLTest extends AbstractTest {
         });
 
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
-            List<Hoge> hoges = sql.query(SELECT_ONE_HOGE, p -> p.set("ID", 6));
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
+            Hoge hoge = new Hoge();
+            hoge.setId(6);
+            List<Hoge> hoges = sql.query(SELECT_ONE_HOGE,  fieldOf(hoge));
 
             assertEquals(hoges.toString(),
                     "[Hoge{id=6, user_name='NAME'}]");
@@ -122,7 +121,7 @@ public class DefaultSQLTest extends AbstractTest {
             Hoge hoge = new Hoge();
             hoge.setUser_name("test");
             hoge.setId(1);
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             int result = sql.update(INSERT_HOGE, fieldOf(hoge));
 
             assertEquals(1, result);
@@ -132,7 +131,7 @@ public class DefaultSQLTest extends AbstractTest {
     @Test
     public void testExecuteUpdate2() throws Exception {
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
 
             Hoge hoge = new Hoge();
             hoge.setUser_name("test");
@@ -151,7 +150,7 @@ public class DefaultSQLTest extends AbstractTest {
     @Test
     public void testBatch1() {
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
 
             AtomicInteger counter = new AtomicInteger();
             List<String> names = Arrays.asList("PIYO", "HOGE", "HUGERA");
@@ -169,7 +168,7 @@ public class DefaultSQLTest extends AbstractTest {
     @Test
     public void testCursor1() {
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
 
             sql.update(INSERT_HOGE, p -> p.set("USER_NAME", "HAGE").set("ID", 1));
             sql.update(INSERT_HOGE, p -> p.set("USER_NAME", "HOGE").set("ID", 2));
@@ -190,7 +189,7 @@ public class DefaultSQLTest extends AbstractTest {
     @Test
     public void testDelete1() {
         run(conn -> {
-            SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, conn);
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             sql.update(INSERT_HOGE, p -> p.set("USER_NAME", "HAGE").set("ID", 1));
 
             int count = sql.update(DELETE_HOGE, p -> p.set("ID", 1));
@@ -234,7 +233,7 @@ public class DefaultSQLTest extends AbstractTest {
      * An enum class to aggregate arbitrary queries.
      */
     public enum HogeQueries implements Query {
-        SELECT_ALL(selectAll("HOGE", as(Hoge.class))),
+        SELECT_ALL(query("SELECT ID, USER_NAME FROM HOGE", as(Hoge.class))),
         SELECT_ALL_ID_GRETER_THAN(query("SELECT ID, USER_NAME FROM HOGE WHERE ID > {id} ORDER BY ID", as(Hoge.class))),
         INSERT_HOGE(insertOne("HOGE")),
         SELECT_ONE_HOGE(selectOne("HOGE", as(Hoge.class))),
