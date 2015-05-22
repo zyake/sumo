@@ -15,4 +15,20 @@ public class Setups {
             builder.set(k, fieldValue);
         });
     }
+
+    public static SQL.ParamSetup limit(int limit) {
+       return builder -> builder.set("__LIMIT__", limit);
+    }
+
+    public static SQL.ParamSetup limit(int limit, int page) {
+        return builder -> builder.set("__LIMIT__", limit).set("__OFFSET__", limit * page);
+    }
+
+    public static SQL.ParamSetup allOf(SQL.ParamSetup... setups) {
+        return builder -> {
+           for (SQL.ParamSetup setup : setups) {
+               setup.invoke(builder);
+           }
+        };
+    }
 }

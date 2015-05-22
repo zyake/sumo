@@ -39,6 +39,14 @@ public class Expressions {
         }
     }
 
+    public static QueryExpression updateWith(String tableName, String whereClause) throws SQLRuntimeException {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
+            return new DynamicExpressionBuilder(connection, parserRef.get()).buildUpdate(tableName, whereClause);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
     public static QueryExpression insertOne(String tableName) throws SQLRuntimeException {
         try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildInsertOne(tableName);
@@ -56,6 +64,15 @@ public class Expressions {
         }
     }
 
+    public static QueryExpression selectWith(String tableName, String whereClause, SQL.RowMapper mapper)
+            throws SQLRuntimeException {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
+            return new DynamicExpressionBuilder(connection, parserRef.get()).buildSelect(tableName, whereClause, mapper);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
     public static QueryExpression deleteOne(String tableName)
             throws SQLRuntimeException {
         try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
@@ -63,5 +80,22 @@ public class Expressions {
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
+    }
+
+    public static QueryExpression deleteWith(String tableName, String whereClause)
+            throws SQLRuntimeException {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
+            return new DynamicExpressionBuilder(connection, parserRef.get()).buildDelete(tableName, whereClause);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    public static String limit() {
+        return " LIMIT {__LIMIT__}";
+    }
+
+    public static String limitAndOffset() {
+        return " LIMIT {__LIMIT__}, OFFSET {__OFFSET__}";
     }
 }

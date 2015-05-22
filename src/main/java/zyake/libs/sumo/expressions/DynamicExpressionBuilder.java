@@ -48,6 +48,22 @@ public class DynamicExpressionBuilder {
         }
     }
 
+
+    public QueryExpression buildUpdate(String tableName, String whereClause) {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            StringBuilder query = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
+            List<String> primaryKeys = getPrimaryKeys(tableName, metaData);
+            addSetClause(tableName, metaData, query, primaryKeys);
+            query.append(" WHERE ").append(whereClause);
+
+            return parser.parse(query.toString(), null);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
     public QueryExpression buildInsertOne(String tableName) throws SQLRuntimeException {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -58,6 +74,21 @@ public class DynamicExpressionBuilder {
             addValues(columns, query);
 
             return parser.parse(query.toString(), null);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    public QueryExpression buildSelect(String tableName, String whereClause, SQL.RowMapper mapper)
+            throws SQLRuntimeException {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            StringBuilder query = new StringBuilder("SELECT ");
+
+            addColumnNames(tableName, metaData, query);
+            query.append(" FROM ").append(tableName).append(" WHERE ").append(whereClause);
+            return parser.parse(query.toString(), mapper);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -89,6 +120,21 @@ public class DynamicExpressionBuilder {
                 .append(tableName)
                 .append(" WHERE ");
             addPrimaryKeyClause(tableName, metaData, query);
+
+            return parser.parse(query.toString(), null);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
+    public QueryExpression buildDelete(String tableName, String whereClause) {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            StringBuilder query = new StringBuilder("DELETE FROM ")
+                    .append(tableName)
+                    .append(" WHERE ")
+                    .append(whereClause);
 
             return parser.parse(query.toString(), null);
         } catch (SQLException e) {

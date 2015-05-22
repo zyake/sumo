@@ -12,8 +12,6 @@ import java.util.List;
  * <p>
  *     A very thin wrapper of a JDBC connection.
  *     It is paired with a JDBC connection and executes specified typed queries.
- *     It doesn't manage the connection, so you should manage it by DI container, JTA and so on.
- *     It mustn't be referred by object fields because a typical lifecycle of a SQL object is within a method.
  * </p>
  */
 public interface SQL<Q extends Query> {

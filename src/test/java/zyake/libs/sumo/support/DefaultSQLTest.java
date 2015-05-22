@@ -3,6 +3,7 @@ package zyake.libs.sumo.support;
 import org.junit.Before;
 import org.junit.Test;
 import zyake.libs.sumo.*;
+import zyake.libs.sumo.setups.Setups;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -198,6 +199,22 @@ public class DefaultSQLTest extends AbstractTest {
         });
     }
 
+    @Test
+    public void testQuery_selectFirstTwo() throws Exception {
+        run(conn -> {
+            execute(conn, "INSERT INTO HOGE(USER_NAME, ID) VALUES('NAME', 6)");
+            execute(conn, "INSERT INTO HOGE(USER_NAME, ID) VALUES('NAME2', 8)");
+            execute(conn, "INSERT INTO HOGE(USER_NAME, ID) VALUES('NAME2', 10)");
+        });
+
+        run(conn -> {
+            SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
+            List<Hoge> hoges = sql.query(SELECT_ALL_FIRST_TWO, Setups.allOf(Setups.limit(1), b -> b.set("ID", 6)));
+            assertEquals(hoges.toString(),
+                    "[Hoge{id=8, user_name='NAME2'}]");
+        });
+    }
+
     public static class Hoge {
 
         private int id;
@@ -233,8 +250,9 @@ public class DefaultSQLTest extends AbstractTest {
      * An enum class to aggregate arbitrary queries.
      */
     public enum HogeQueries implements Query {
+        SELECT_ALL_FIRST_TWO(selectWith("HOGE", "ID > {ID} " + limit(), as(Hoge.class))),
         SELECT_ALL(query("SELECT ID, USER_NAME FROM HOGE", as(Hoge.class))),
-        SELECT_ALL_ID_GRETER_THAN(query("SELECT ID, USER_NAME FROM HOGE WHERE ID > {id} ORDER BY ID", as(Hoge.class))),
+        SELECT_ALL_ID_GRETER_THAN(selectWith("HOGE", "ID > {id} ORDER BY ID", as(Hoge.class))),
         INSERT_HOGE(insertOne("HOGE")),
         SELECT_ONE_HOGE(selectOne("HOGE", as(Hoge.class))),
         UPDATE_HOGE(updateOne("HOGE")),
