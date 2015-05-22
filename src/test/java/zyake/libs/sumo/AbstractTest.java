@@ -18,7 +18,7 @@ public abstract class AbstractTest {
         ds.setURL("jdbc:h2:~/test");
         ds.setUser("sa");
         ds.setPassword("");
-        Expressions.setDataSource(ds);
+        SUMO.init(ds);
     }
 
     protected void run(ArbitraryStatementExecutor executor) {

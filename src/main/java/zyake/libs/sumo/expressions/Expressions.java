@@ -3,6 +3,7 @@ package zyake.libs.sumo.expressions;
 import zyake.libs.sumo.QueryExpression;
 import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.SQLRuntimeException;
+import zyake.libs.sumo.SUMO;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,28 +12,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An object that generates SQL expressions.
- *
- * <p>
- *     If you want to generate a SQL expression automatically,
- *     you must call the {@link #setDataSource(javax.sql.DataSource)} method
- *     before other methods invocation.
- * </p>
  */
 public class Expressions {
 
     private final static AtomicReference<ExpressionParser> parserRef = new AtomicReference<>(new NamedExpressionParser());
-
-    private final static AtomicReference<DataSource> dataSourceRef = new AtomicReference<>();
 
     private Expressions() {
     }
 
     public static void setParserRef(ExpressionParser parser) {
         parserRef.set(parser);
-    }
-
-    public static void setDataSource(DataSource dataSource) {
-        dataSourceRef.set(dataSource);
     }
 
     public static QueryExpression query(String exp, SQL.RowMapper mapper) {
@@ -44,7 +33,7 @@ public class Expressions {
     }
 
     public static QueryExpression updateOne(String tableName) throws SQLRuntimeException {
-        try ( Connection connection = dataSourceRef.get().getConnection() ) {
+        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildUpdateOne(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
@@ -52,17 +41,8 @@ public class Expressions {
     }
 
     public static QueryExpression insertOne(String tableName) throws SQLRuntimeException {
-        try ( Connection connection = dataSourceRef.get().getConnection() ) {
+        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildInsertOne(tableName);
-        } catch (SQLException e) {
-            throw new SQLRuntimeException(e);
-        }
-    }
-
-    public static QueryExpression selectAll(String tableName, SQL.RowMapper mapper)
-            throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try ( Connection connection = dataSourceRef.get().getConnection() ) {
-            return new DynamicExpressionBuilder(connection, parserRef.get()).buildSelectAll(tableName, mapper);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -70,7 +50,7 @@ public class Expressions {
 
     public static QueryExpression selectOne(String tableName, SQL.RowMapper mapper)
             throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try ( Connection connection = dataSourceRef.get().getConnection() ) {
+        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildSelectOne(tableName, mapper);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
@@ -79,7 +59,7 @@ public class Expressions {
 
     public static QueryExpression deleteOne(String tableName)
             throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try ( Connection connection = dataSourceRef.get().getConnection() ) {
+        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildDeleteOne(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);

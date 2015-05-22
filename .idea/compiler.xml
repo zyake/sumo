@@ -23,8 +23,11 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="database" />
+        <module name="sumo" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="sumo" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
-
