@@ -21,7 +21,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 1 - Setup the DataSource.
 
 ``` java
-    SUMO.init(dataSource);
+    Expressions.setDataSource(dataSource);
 ```
 
 2 -  Define entities and queries.
@@ -29,7 +29,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 ``` java
 
     // An entity.
-    public class Hoge {
+    public static class Hoge {
 
         private int id;
 
@@ -54,6 +54,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 
     // A query object.
     public enum HogeQueries implements Query {
+        SELECT_ALL(Queries.selectAll("HOGE", Mappers.as(Hoge.class))),
         INSERT_HOGE(Queries.insertOne("HOGE")),
         SELECT_ONE_HOGE(Queries.selectOne("HOGE", Mappers.as(Hoge.class))),
         UPDATE_HOGE(Queries.updateOne("HOGE")),
@@ -75,7 +76,7 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
 3 - Build a SQL object and execute a query.
 
 ``` java
-      SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->datasource.getConnection());
+      SQL<HogeQueries> sql = new DefaultSQL(HogeQueries.class, datasource.getConnection());
 
       // INSERT one
       Hoge hoge = new Hoge();
@@ -83,8 +84,8 @@ A tiny JDBC mapper library that alleviates the burden of JDBC complexity.
       hoge.setId(1);
       sql.update(HogeQueries.INSERT_HOGE, Setups.fieldOf(hoge));
 
-      // SELECT one
-      Hoge hoges = sql.queryOne(HogeQueries.SELECT_ONE_HOGE, Setups.fieldOf(hoge));
+      // SELECT all
+      List<Hoge> hoges = sql.query(HogeQueries.SELECT_ALL);
 
       // UPDATE one
       hoge.setUser_name("CHANGED!");
