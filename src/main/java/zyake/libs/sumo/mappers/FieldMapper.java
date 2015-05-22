@@ -4,6 +4,7 @@ import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.util.Classes;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -51,7 +52,12 @@ public class FieldMapper<R> implements SQL.RowMapper<R> {
             validateField(colName);
             Object value = resultSet.getObject(i);
             try {
-                fieldMap.get(colName).set(object, value);
+                Field field = fieldMap.get(colName);
+                if (Modifier.isTransient(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+                    continue;
+                }
+
+                field.set(object, value);
             } catch (IllegalAccessException | IllegalArgumentException e) {
                 throw new MappingFailedException(
                         "The field mapping failed! : target=" + target  +", field=" + colName + ", value=" + value, e);

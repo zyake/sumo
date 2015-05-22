@@ -79,6 +79,23 @@ public class DynamicExpressionBuilder {
         }
     }
 
+    public QueryExpression buildInsertWithoutPK(String tableName) throws SQLRuntimeException {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            StringBuilder query = new StringBuilder("INSERT INTO ").append(tableName).append("(");
+            List<String> columns = addColumnNames(tableName, metaData, query);
+            List<String> primaryKeys = getPrimaryKeys(tableName, metaData);
+            columns.removeAll(primaryKeys);
+            query.append(")");
+            addValues(columns, query);
+
+            return parser.parse(query.toString(), null);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
     public QueryExpression buildSelect(String tableName, String whereClause, SQL.RowMapper mapper)
             throws SQLRuntimeException {
         try {

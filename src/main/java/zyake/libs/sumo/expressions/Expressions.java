@@ -55,6 +55,14 @@ public class Expressions {
         }
     }
 
+    public static QueryExpression insertWithoutPK(String tableName) throws SQLRuntimeException {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
+            return new DynamicExpressionBuilder(connection, parserRef.get()).buildInsertWithoutPK(tableName);
+        } catch (SQLException e) {
+            throw new SQLRuntimeException(e);
+        }
+    }
+
     public static QueryExpression selectOne(String tableName, SQL.RowMapper mapper)
             throws SQLRuntimeException {
         try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
