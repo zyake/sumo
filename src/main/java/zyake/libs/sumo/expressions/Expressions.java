@@ -4,6 +4,7 @@ import zyake.libs.sumo.QueryExpression;
 import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.SQLRuntimeException;
 import zyake.libs.sumo.SUMO;
+import zyake.libs.sumo.unsafe.SUMOUnsafe;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,7 +34,7 @@ public class Expressions {
     }
 
     public static QueryExpression updateOne(String tableName) throws SQLRuntimeException {
-        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildUpdateOne(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
@@ -41,7 +42,7 @@ public class Expressions {
     }
 
     public static QueryExpression insertOne(String tableName) throws SQLRuntimeException {
-        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildInsertOne(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
@@ -50,7 +51,7 @@ public class Expressions {
 
     public static QueryExpression selectOne(String tableName, SQL.RowMapper mapper)
             throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildSelectOne(tableName, mapper);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
@@ -59,7 +60,7 @@ public class Expressions {
 
     public static QueryExpression deleteOne(String tableName)
             throws MultiplePrimaryKeyException, SQLRuntimeException {
-        try ( Connection connection = SUMO.getDataSource().getConnection() ) {
+        try ( Connection connection = SUMOUnsafe.getRuntimeDataSource().getConnection() ) {
             return new DynamicExpressionBuilder(connection, parserRef.get()).buildDeleteOne(tableName);
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);

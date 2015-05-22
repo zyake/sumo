@@ -18,7 +18,7 @@ public final class SUMO {
         dataSourceRef.set(dataSource);
     }
 
-    public static DataSource getDataSource() {
+    private static DataSource getDataSource() {
         if (dataSourceRef.get() == null) {
             throw new SUMOException("A DataSource must be set!");
         }

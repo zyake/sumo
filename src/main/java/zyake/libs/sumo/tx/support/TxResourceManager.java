@@ -11,7 +11,11 @@ public final class TxResourceManager {
         if ( localConnection.get() == null ) {
             localConnection.set(new Stack<>());
         }
-        return localConnection.get().peek();
+        if ( localConnection.get().size() > 0 ) {
+            return localConnection.get().peek();
+        } else {
+            return null;
+        }
     }
 
     public static void pushCurrentConnection(Connection connection) {
