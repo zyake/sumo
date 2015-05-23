@@ -1,14 +1,19 @@
 package zyake.libs.sumo.setups;
 
 import zyake.libs.sumo.SQL;
+import zyake.libs.sumo.util.Args;
 import zyake.libs.sumo.util.Classes;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class Setups {
+public final class Setups {
+
+    private Setups() {
+    }
 
     public static SQL.ParamSetup fieldOf(Object obj) {
+        Args.check(obj);
         Map<String, Field> fieldMap = Classes.getFieldMap(obj.getClass(), true);
         return builder -> fieldMap.forEach((k, v) -> {
             Object fieldValue = Classes.getField(v, obj);
@@ -25,6 +30,7 @@ public class Setups {
     }
 
     public static SQL.ParamSetup allOf(SQL.ParamSetup... setups) {
+        Args.check(setups);
         return builder -> {
            for (SQL.ParamSetup setup : setups) {
                setup.invoke(builder);

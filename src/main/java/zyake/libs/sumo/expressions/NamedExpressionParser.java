@@ -4,6 +4,7 @@ import zyake.libs.sumo.ParamBuilder;
 import zyake.libs.sumo.QueryExpression;
 import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.SQLRuntimeException;
+import zyake.libs.sumo.util.Args;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,10 +28,12 @@ import java.util.List;
  *     method was invoked.
  * </p>
  */
-public class NamedExpressionParser implements ExpressionParser {
+public final class NamedExpressionParser implements ExpressionParser {
 
     @Override
     public QueryExpression parse(String sqlQuery, SQL.RowMapper mapper) throws ExpressionParseFailedException {
+        Args.check(sqlQuery);
+        Args.check(mapper);
         List<String> parameters = new ArrayList<>();
         StringBuilder parsedQuery = new StringBuilder();
         Positions currentPos = Positions.OnOther;
@@ -144,7 +147,7 @@ public class NamedExpressionParser implements ExpressionParser {
         return new ParsedExpression(parsedQuery, parameters, mapper);
     }
 
-    private class ParsedExpression implements QueryExpression {
+    private final class ParsedExpression implements QueryExpression {
 
         private final String parsedQuery;
 
@@ -165,6 +168,8 @@ public class NamedExpressionParser implements ExpressionParser {
 
         @Override
         public void evaluate(PreparedStatement statement, ParamBuilder builder) {
+            Args.check(statement);
+            Args.check(builder);
             int i = 1;
             for ( String parameter : parameters ) {
                 Object paramValue = builder.getParams().get(parameter);

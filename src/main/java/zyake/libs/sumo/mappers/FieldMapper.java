@@ -1,6 +1,7 @@
 package zyake.libs.sumo.mappers;
 
 import zyake.libs.sumo.SQL;
+import zyake.libs.sumo.util.Args;
 import zyake.libs.sumo.util.Classes;
 
 import java.lang.reflect.Field;
@@ -24,7 +25,7 @@ import java.util.Map;
   *
  * @param <R>
  */
-public class FieldMapper<R> implements SQL.RowMapper<R> {
+public final class FieldMapper<R> implements SQL.RowMapper<R> {
 
     private final Class<R> target;
 
@@ -33,6 +34,7 @@ public class FieldMapper<R> implements SQL.RowMapper<R> {
     private final boolean ignoreCase;
 
     public FieldMapper(Class<R> target, boolean ignoreCase) {
+        Args.check(target);
         this.target = target;
         this.ignoreCase = ignoreCase;
         Map<String, Field> fieldMap = Classes.getFieldMap(target, ignoreCase);
@@ -42,6 +44,7 @@ public class FieldMapper<R> implements SQL.RowMapper<R> {
 
      @Override
     public R map(ResultSet resultSet) throws SQLException, MappingFailedException {
+         Args.check(resultSet);
         R object = Classes.newObject(target);
         ResultSetMetaData metaData = resultSet.getMetaData();
         for ( int i = 1 ; i <= metaData.getColumnCount() ; i ++ ) {

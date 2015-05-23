@@ -2,7 +2,7 @@ package zyake.libs.sumo;
 
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.BeforeClass;
-import zyake.libs.sumo.expressions.Expressions;
+import zyake.libs.sumo.unsafe.DisastrousResourceManager;
 
 import java.sql.*;
 
@@ -19,6 +19,7 @@ public abstract class AbstractTest {
         ds.setUser("sa");
         ds.setPassword("");
         SUMO.init(ds);
+        DisastrousResourceManager.setDebug(true);
     }
 
     protected void run(ArbitraryStatementExecutor executor) {

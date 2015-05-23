@@ -1,5 +1,7 @@
 package zyake.libs.sumo;
 
+import zyake.libs.sumo.util.Args;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,11 +19,13 @@ import java.util.Map;
  * </pre>
  *
  */
-public class ParamBuilder {
+public final class ParamBuilder {
 
     private final Map<String, Object> params = new HashMap<>();
 
     public ParamBuilder set(String param, Object value) {
+        Args.check(param);
+        Args.check(value);
         params.put(param, value);
         return this;
     }

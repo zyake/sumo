@@ -5,12 +5,13 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Classes {
+public final class Classes {
 
     private Classes() {
     }
 
     public static <T> T newObject(Class<T> target) {
+        Args.check(target);
         try {
             return target.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -19,6 +20,8 @@ public class Classes {
     }
 
     public static <T> T getField(Field field, Object obj) {
+        Args.check(field);
+        Args.check(obj);
         try {
             return (T) field.get(obj);
         } catch (IllegalAccessException e) {
@@ -28,6 +31,7 @@ public class Classes {
     }
 
     public static Map<String, Field> getFieldMap(Class target, boolean ignoreCase) {
+        Args.check(target);
         Map<String, Field> fieldMap = new HashMap<>();
         Field[] declaredFields = target.getDeclaredFields();
         for ( Field field : declaredFields ) {

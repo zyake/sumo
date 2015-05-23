@@ -109,6 +109,7 @@ public class DefaultSQLTest extends AbstractTest {
             SQL<HogeQueries> sql = SUMO.newSQL(HogeQueries.class, ()->conn);
             Hoge hoge = new Hoge();
             hoge.setId(6);
+            hoge.setUser_name("");
             List<Hoge> hoges = sql.query(SELECT_ONE_HOGE,  fieldOf(hoge));
 
             assertEquals(hoges.toString(),

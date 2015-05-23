@@ -3,6 +3,8 @@ package zyake.libs.sumo.expressions;
 import zyake.libs.sumo.QueryExpression;
 import zyake.libs.sumo.SQL;
 import zyake.libs.sumo.SQLRuntimeException;
+import zyake.libs.sumo.mappers.Mappers;
+import zyake.libs.sumo.util.Args;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -23,16 +25,20 @@ public class DynamicExpressionBuilder {
     private final ExpressionParser parser;
 
     public DynamicExpressionBuilder(Connection connection, ExpressionParser parser) {
+        Args.check(connection);
+        Args.check(parser);
         this.connection = connection;
         this.parser = parser;
     }
 
     public DynamicExpressionBuilder(Connection connection) {
+        Args.check(connection);
         this.connection = connection;
         this.parser = new NamedExpressionParser();
     }
 
     public QueryExpression buildUpdateOne(String tableName) throws SQLRuntimeException {
+        Args.check(tableName);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -42,7 +48,7 @@ public class DynamicExpressionBuilder {
             query.append(" WHERE ");
             addPrimaryKeyClause(tableName, metaData, query);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -50,6 +56,8 @@ public class DynamicExpressionBuilder {
 
 
     public QueryExpression buildUpdate(String tableName, String whereClause) {
+        Args.check(tableName);
+        Args.check(whereClause);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -58,13 +66,14 @@ public class DynamicExpressionBuilder {
             addSetClause(tableName, metaData, query, primaryKeys);
             query.append(" WHERE ").append(whereClause);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
     }
 
     public QueryExpression buildInsertOne(String tableName) throws SQLRuntimeException {
+        Args.check(tableName);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -73,13 +82,14 @@ public class DynamicExpressionBuilder {
             query.append(")");
             addValues(columns, query);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
     }
 
     public QueryExpression buildInsertWithoutPK(String tableName) throws SQLRuntimeException {
+        Args.check(tableName);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -90,7 +100,7 @@ public class DynamicExpressionBuilder {
             query.append(")");
             addValues(columns, query);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
@@ -98,6 +108,10 @@ public class DynamicExpressionBuilder {
 
     public QueryExpression buildSelect(String tableName, String whereClause, SQL.RowMapper mapper)
             throws SQLRuntimeException {
+        Args.check(tableName);
+        Args.check(whereClause);
+        Args.check(mapper);
+
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -113,6 +127,8 @@ public class DynamicExpressionBuilder {
 
     public QueryExpression buildSelectOne(String tableName, SQL.RowMapper mapper)
             throws SQLRuntimeException {
+        Args.check(tableName);
+        Args.check(mapper);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -130,6 +146,7 @@ public class DynamicExpressionBuilder {
 
     public QueryExpression buildDeleteOne(String tableName)
             throws SQLRuntimeException {
+        Args.check(tableName);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -138,13 +155,15 @@ public class DynamicExpressionBuilder {
                 .append(" WHERE ");
             addPrimaryKeyClause(tableName, metaData, query);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }
     }
 
     public QueryExpression buildDelete(String tableName, String whereClause) {
+        Args.check(tableName);
+        Args.check(whereClause);
         try {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -153,7 +172,7 @@ public class DynamicExpressionBuilder {
                     .append(" WHERE ")
                     .append(whereClause);
 
-            return parser.parse(query.toString(), null);
+            return parser.parse(query.toString(), Mappers.asNull());
         } catch (SQLException e) {
             throw new SQLRuntimeException(e);
         }

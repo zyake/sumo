@@ -4,5 +4,7 @@ public class UtilRuntimeException extends RuntimeException {
 
     public UtilRuntimeException(String message, Throwable cause) {
         super(message, cause);
+        Args.check(message);
+        Args.check(cause);
     }
 }
