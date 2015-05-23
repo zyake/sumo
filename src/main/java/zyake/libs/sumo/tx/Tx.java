@@ -14,9 +14,9 @@ import java.util.function.Consumer;
  */
 public final class Tx {
 
-    protected static final AtomicReference<Consumer<Runnable>> txDelegate = new AtomicReference<>() ;
+    private static final AtomicReference<Consumer<Runnable>> txDelegate = new AtomicReference<>() ;
 
-    protected static final AtomicReference<Consumer<Runnable>> txAsNewDelegate = new AtomicReference<>();
+    private static final AtomicReference<Consumer<Runnable>> txAsNewDelegate = new AtomicReference<>();
 
     private static final Consumer<Runnable> DEFAULT_TX_AS_NEW_RUNNER = (runnable) -> {
         Connection connection;
